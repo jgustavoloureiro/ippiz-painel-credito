@@ -1,0 +1,128 @@
+table _Medidas
+
+	measure 'Valor Concedido (Mês Atual)' = ```
+			CALCULATE(
+			    SUM(FatoSerieMensal[ValorConcedido]),
+			    LASTDATE(DimTempo[Data])
+			)
+			```
+		formatString: #,##0
+		displayFolder: Carteira
+
+	measure 'Variação MoM (%)' = ```
+			VAR MesAtual = [Valor Concedido (Mês Atual)]
+			VAR MesAnterior =
+			    CALCULATE(
+			        SUM(FatoSerieMensal[ValorConcedido]),
+			        DATEADD(DimTempo[Data], -1, MONTH)
+			    )
+			RETURN
+			    DIVIDE(MesAtual - MesAnterior, MesAnterior)
+			```
+		formatString: 0.0%;-0.0%
+		displayFolder: Carteira
+
+	measure 'Qtd Operações (Mês Atual)' = ```
+			CALCULATE(
+			    SUM(FatoSerieMensal[QtdOperacoes]),
+			    LASTDATE(DimTempo[Data])
+			)
+			```
+		formatString: #,##0
+		displayFolder: Carteira
+
+	measure 'Ticket Médio' = ```
+			DIVIDE([Valor Concedido (Mês Atual)], [Qtd Operações (Mês Atual)])
+			```
+		formatString: #,##0
+		displayFolder: Carteira
+
+	measure 'Taxa de Aprovação' = ```
+			CALCULATE(
+			    AVERAGE(FatoSerieMensal[TaxaAprovacao]),
+			    LASTDATE(DimTempo[Data])
+			)
+			```
+		formatString: 0.0%;-0.0%
+		displayFolder: Risco e Aprovação
+
+	measure 'Inadimplência 15d' = ```
+			CALCULATE(
+			    AVERAGE(FatoSerieMensal[Inadimplencia15d]),
+			    LASTDATE(DimTempo[Data])
+			)
+			```
+		formatString: 0.0%;-0.0%
+		displayFolder: Risco e Aprovação
+
+	measure 'Inadimplência 30d' = ```
+			CALCULATE(
+			    AVERAGE(FatoSerieMensal[Inadimplencia30d]),
+			    LASTDATE(DimTempo[Data])
+			)
+			```
+		formatString: 0.0%;-0.0%
+		displayFolder: Risco e Aprovação
+
+	measure 'Inadimplência 90d' = ```
+			CALCULATE(
+			    AVERAGE(FatoSerieMensal[Inadimplencia90d]),
+			    LASTDATE(DimTempo[Data])
+			)
+			```
+		formatString: 0.0%;-0.0%
+		displayFolder: Risco e Aprovação
+
+	measure 'SLA Médio (horas)' = ```
+			CALCULATE(
+			    AVERAGE(FatoSerieMensal[SlaMedioHoras]),
+			    LASTDATE(DimTempo[Data])
+			)
+			```
+		formatString: 0.0
+		displayFolder: Eficiência Operacional
+
+	measure 'Recuperação em Cobrança' = ```
+			CALCULATE(
+			    AVERAGE(FatoSerieMensal[RecuperacaoCobranca]),
+			    LASTDATE(DimTempo[Data])
+			)
+			```
+		formatString: 0.0%;-0.0%
+		displayFolder: Eficiência Operacional
+
+	measure NPS = ```
+			CALCULATE(
+			    AVERAGE(FatoSerieMensal[NPS]),
+			    LASTDATE(DimTempo[Data])
+			)
+			```
+		formatString: 0.0
+		displayFolder: Eficiência Operacional
+
+	measure 'Carteira Ativa Total' = ```
+			SUM(Regional[ValorCarteira])
+			```
+		formatString: #,##0
+		displayFolder: Carteira
+
+	measure 'Clientes Ativos Total' = ```
+			SUM(Regional[QtdClientesAtivos])
+			```
+		formatString: #,##0
+		displayFolder: Carteira
+
+	measure '% Conversão do Funil' = ```
+			DIVIDE(
+			    CALCULATE(SUM(FunilAprovacao[Qtd]), FunilAprovacao[Etapa] = "Desembolsado"),
+			    CALCULATE(SUM(FunilAprovacao[Qtd]), FunilAprovacao[Etapa] = "Solicitado")
+			)
+			```
+		formatString: 0.0%;-0.0%
+		displayFolder: Funil
+
+	partition _Medidas = calculated
+		mode: import
+		source = ```
+				ROW("Medidas", 0)
+				```

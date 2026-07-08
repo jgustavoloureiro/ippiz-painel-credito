@@ -1,0 +1,41 @@
+table OperacaoDiaria
+
+	column Data
+		dataType: dateTime
+		formatString: dd/mm/yyyy
+		summarizeBy: none
+		sourceColumn: data
+
+	column Analista
+		dataType: string
+		summarizeBy: none
+		sourceColumn: analista
+
+	column FilaPendente
+		dataType: int64
+		formatString: #,##0
+		summarizeBy: average
+		sourceColumn: fila_pendente
+
+	column TempoMedioRespostaH
+		dataType: double
+		formatString: 0.0
+		summarizeBy: average
+		sourceColumn: tempo_medio_resposta_h
+
+	column OperacoesAnalisadas
+		dataType: int64
+		formatString: #,##0
+		summarizeBy: sum
+		sourceColumn: operacoes_analisadas
+
+	partition OperacaoDiaria = m
+		mode: import
+		source =
+				let
+					Source = Json.Document(File.Contents("C:\CAMINHO\PARA\ippiz-portfolio\data\ippiz_data.json")),
+					dados = Source[operacao_diaria],
+					Tabela = Table.FromRecords(dados),
+					TiposAplicados = Table.TransformColumnTypes(Tabela,{{"data", type date}})
+				in
+					TiposAplicados

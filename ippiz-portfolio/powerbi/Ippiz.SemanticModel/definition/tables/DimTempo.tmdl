@@ -1,0 +1,49 @@
+table DimTempo
+
+	column Competencia
+		dataType: string
+		summarizeBy: none
+		sourceColumn: Competencia
+
+	column Data
+		dataType: dateTime
+		formatString: dd/mm/yyyy
+		summarizeBy: none
+		sourceColumn: Data
+
+	column MesLabel
+		dataType: string
+		summarizeBy: none
+		sourceColumn: MesLabel
+
+	column Ano
+		dataType: int64
+		summarizeBy: none
+		sourceColumn: Ano
+
+	column NumeroMes
+		dataType: int64
+		summarizeBy: none
+		sourceColumn: NumeroMes
+
+	hierarchy 'Hierarquia de Data'
+		level Ano
+			column: Ano
+		level Mes
+			column: MesLabel
+
+	partition DimTempo = m
+		mode: import
+		source =
+				let
+					Source = Json.Document(File.Contents("C:\CAMINHO\PARA\ippiz-portfolio\data\ippiz_data.json")),
+					serie = Source[serie_mensal],
+					Tabela = Table.FromRecords(serie),
+					Selecionado = Table.SelectColumns(Tabela,{"competencia","mes_label"}),
+					ComData = Table.AddColumn(Selecionado, "Data", each Date.FromText([competencia] & "-01")),
+					ComAno = Table.AddColumn(ComData, "Ano", each Date.Year([Data]), Int64.Type),
+					ComMes = Table.AddColumn(ComAno, "NumeroMes", each Date.Month([Data]), Int64.Type),
+					TiposAplicados = Table.TransformColumnTypes(ComMes,{{"Data", type datetime}}),
+					Renomeado = Table.RenameColumns(TiposAplicados,{{"competencia","Competencia"},{"mes_label","MesLabel"}})
+				in
+					Renomeado

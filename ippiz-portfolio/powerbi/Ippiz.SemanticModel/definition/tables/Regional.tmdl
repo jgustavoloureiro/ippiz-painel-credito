@@ -1,0 +1,41 @@
+table Regional
+
+	column Regiao
+		dataType: string
+		summarizeBy: none
+		sourceColumn: regiao
+
+	column ValorCarteira
+		dataType: double
+		formatString: #,##0
+		summarizeBy: sum
+		sourceColumn: valor_carteira
+
+	column QtdClientesAtivos
+		dataType: int64
+		formatString: #,##0
+		summarizeBy: sum
+		sourceColumn: qtd_clientes_ativos
+
+	column Inadimplencia30d
+		dataType: double
+		formatString: 0.0%;-0.0%
+		summarizeBy: average
+		sourceColumn: inadimplencia_30d
+
+	column TicketMedio
+		dataType: double
+		formatString: #,##0
+		summarizeBy: average
+		sourceColumn: ticket_medio
+
+	partition Regional = m
+		mode: import
+		source =
+				let
+					Source = Json.Document(File.Contents("C:\CAMINHO\PARA\ippiz-portfolio\data\ippiz_data.json")),
+					dados = Source[regional],
+					Tabela = Table.FromRecords(dados),
+					Percentual = Table.TransformColumns(Tabela,{{"inadimplencia_30d", each _ / 100, type number}})
+				in
+					Percentual

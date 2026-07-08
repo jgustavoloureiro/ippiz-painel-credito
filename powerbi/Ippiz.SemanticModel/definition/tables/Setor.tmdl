@@ -1,0 +1,28 @@
+table Setor
+
+	column Setor
+		dataType: string
+		summarizeBy: none
+		sourceColumn: setor
+
+	column ValorCarteira
+		dataType: double
+		formatString: #,##0
+		summarizeBy: sum
+		sourceColumn: valor_carteira
+
+	column QtdClientesAtivos
+		dataType: int64
+		formatString: #,##0
+		summarizeBy: sum
+		sourceColumn: qtd_clientes_ativos
+
+	partition Setor = m
+		mode: import
+		source =
+				let
+					Source = Json.Document(File.Contents("C:\CAMINHO\PARA\ippiz-portfolio\data\ippiz_data.json")),
+					dados = Source[setor],
+					Tabela = Table.FromRecords(dados)
+				in
+					Tabela

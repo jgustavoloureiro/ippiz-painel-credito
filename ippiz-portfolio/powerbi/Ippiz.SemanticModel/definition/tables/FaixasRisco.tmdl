@@ -1,0 +1,37 @@
+table FaixasRisco
+
+	column Faixa
+		dataType: string
+		summarizeBy: none
+		sourceColumn: faixa
+		sortByColumn: Ordem
+
+	column Ordem
+		dataType: int64
+		summarizeBy: none
+		sourceColumn: ordem
+		isHidden
+
+	column Valor
+		dataType: double
+		formatString: #,##0
+		summarizeBy: sum
+		sourceColumn: valor
+
+	column Percentual
+		dataType: double
+		formatString: 0.00%;-0.00%
+		summarizeBy: sum
+		sourceColumn: percentual
+
+	partition FaixasRisco = m
+		mode: import
+		source =
+				let
+					Source = Json.Document(File.Contents("C:\CAMINHO\PARA\ippiz-portfolio\data\ippiz_data.json")),
+					dados = Source[faixas_risco],
+					Tabela = Table.FromRecords(dados),
+					Ordenado = Table.Sort(Tabela,{{"ordem", Order.Ascending}}),
+					Percentual = Table.TransformColumns(Ordenado,{{"percentual", each _ / 100, type number}})
+				in
+					Percentual

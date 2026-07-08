@@ -1,0 +1,89 @@
+table FatoSerieMensal
+
+	column Competencia
+		dataType: string
+		summarizeBy: none
+		sourceColumn: competencia
+
+	column ValorConcedido
+		dataType: double
+		formatString: #,##0
+		summarizeBy: sum
+		sourceColumn: valor_concedido
+
+	column QtdOperacoes
+		dataType: int64
+		formatString: #,##0
+		summarizeBy: sum
+		sourceColumn: qtd_operacoes
+
+	column TicketMedio
+		dataType: double
+		formatString: #,##0
+		summarizeBy: average
+		sourceColumn: ticket_medio
+
+	column Inadimplencia15d
+		dataType: double
+		formatString: 0.0%;-0.0%
+		summarizeBy: average
+		sourceColumn: inadimplencia_15d
+
+	column Inadimplencia30d
+		dataType: double
+		formatString: 0.0%;-0.0%
+		summarizeBy: average
+		sourceColumn: inadimplencia_30d
+
+	column Inadimplencia90d
+		dataType: double
+		formatString: 0.0%;-0.0%
+		summarizeBy: average
+		sourceColumn: inadimplencia_90d
+
+	column TaxaAprovacao
+		dataType: double
+		formatString: 0.0%;-0.0%
+		summarizeBy: average
+		sourceColumn: taxa_aprovacao
+
+	column SlaMedioHoras
+		dataType: double
+		formatString: 0.0
+		summarizeBy: average
+		sourceColumn: sla_medio_horas
+
+	column RecuperacaoCobranca
+		dataType: double
+		formatString: 0.0%;-0.0%
+		summarizeBy: average
+		sourceColumn: recuperacao_cobranca
+
+	column NPS
+		dataType: double
+		formatString: 0.0
+		summarizeBy: average
+		sourceColumn: nps
+
+	partition FatoSerieMensal = m
+		mode: import
+		source =
+				let
+					Source = Json.Document(File.Contents("C:\CAMINHO\PARA\ippiz-portfolio\data\ippiz_data.json")),
+					serie = Source[serie_mensal],
+					Tabela = Table.FromRecords(serie),
+					TiposAplicados = Table.TransformColumnTypes(Tabela,{
+						{"competencia", type text}, {"valor_concedido", type number},
+						{"qtd_operacoes", Int64.Type}, {"ticket_medio", type number},
+						{"inadimplencia_15d", type number}, {"inadimplencia_30d", type number},
+						{"inadimplencia_90d", type number}, {"taxa_aprovacao", type number},
+						{"sla_medio_horas", type number}, {"recuperacao_cobranca", type number},
+						{"nps", type number}}),
+					Percentuais = Table.TransformColumns(TiposAplicados,{
+						{"inadimplencia_15d", each _ / 100, type number},
+						{"inadimplencia_30d", each _ / 100, type number},
+						{"inadimplencia_90d", each _ / 100, type number},
+						{"taxa_aprovacao", each _ / 100, type number},
+						{"recuperacao_cobranca", each _ / 100, type number}})
+				in
+					Percentuais

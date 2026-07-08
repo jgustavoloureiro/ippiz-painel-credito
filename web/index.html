@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ippiz · Painel Executivo de Carteira e Risco</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<!-- ============ CAPA ============ -->
+<section id="cover">
+  <div class="cover-eyebrow">Painel de Crédito · Ippiz</div>
+  <div class="cover-mark">Ip</div>
+  <h1>Um painel, três leituras — cada nível da organização vê o que precisa decidir.</h1>
+  <p class="cover-sub">Crédito instantâneo via PIX para micro e pequenas empresas. Dados fictícios de
+    portfólio, construídos para mostrar como estruturo analytics para diferentes públicos dentro da
+    mesma empresa.</p>
+
+  <div class="cover-headline" id="cover-headline"><!-- preenchido via JS --></div>
+
+  <div class="pyramid">
+    <div class="tier" id="tier-diretoria" data-view="executiva">
+      <div>
+        <div class="tier-eyebrow">Diretoria</div>
+        <div class="tier-title">Visão Executiva</div>
+        <div class="tier-desc">Carteira, aprovação e tendência — decisão estratégica em 10 segundos.</div>
+      </div>
+      <div class="tier-arrow">→</div>
+    </div>
+    <div class="tier" id="tier-coordenacao" data-view="risco">
+      <div>
+        <div class="tier-eyebrow">Coordenação</div>
+        <div class="tier-title">Risco &amp; Processos</div>
+        <div class="tier-desc">Inadimplência, aging de carteira, SLA de análise e produtividade por analista.</div>
+      </div>
+      <div class="tier-arrow">→</div>
+    </div>
+    <div class="tier" id="tier-gerencia" data-view="comercial">
+      <div>
+        <div class="tier-eyebrow">Gerência</div>
+        <div class="tier-title">Comercial &amp; Regional</div>
+        <div class="tier-desc">Carteira por região, segmento e setor — para priorizar metas e times locais.</div>
+      </div>
+      <div class="tier-arrow">→</div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ APP (pós-capa) ============ -->
+<div id="app">
+  <header class="topbar">
+    <div class="brand">
+      <button class="back-link" id="back-to-cover">← Capa</button>
+      <div class="brand-mark">Ip</div>
+      <div class="brand-text">
+        <h1>Ippiz · Painel Executivo</h1>
+        <p>Crédito via PIX para micro e pequenas empresas — dados fictícios</p>
+      </div>
+    </div>
+    <div class="topbar-actions">
+      <button class="theme-toggle" id="theme-toggle">🌙 Escuro</button>
+      <button class="assistant-btn" id="assistant-open">✦ Assistente do Painel</button>
+    </div>
+  </header>
+
+  <nav class="view-tabs">
+    <button class="view-tab" data-view="executiva"><span class="tab-org">Diretoria</span>Visão Executiva</button>
+    <button class="view-tab" data-view="risco"><span class="tab-org">Coordenação</span>Risco &amp; Processos</button>
+    <button class="view-tab" data-view="comercial"><span class="tab-org">Gerência</span>Comercial &amp; Regional</button>
+  </nav>
+
+  <div class="filterbar">
+    <span class="label">Região</span>
+    <div class="chip-group" id="chips-regiao"></div>
+    <span class="label">Segmento</span>
+    <div class="chip-group" id="chips-segmento"></div>
+    <span class="label">Setor</span>
+    <div class="chip-group" id="chips-setor"></div>
+    <div class="range-wrap">
+      <span class="label">Período</span>
+      <input type="range" id="month-slider" min="0" max="17" value="17">
+      <span id="month-slider-label" class="mono"></span>
+    </div>
+    <span class="reset-link" id="reset-filters">Limpar filtros</span>
+  </div>
+
+  <main>
+    <!-- ===== Visão Executiva (Diretoria) ===== -->
+    <section class="view-panel" id="view-executiva">
+      <div class="section-title">Indicadores do mês</div>
+      <div class="kpi-grid" id="kpi-grid-executiva"></div>
+
+      <div class="section-title">Evolução da carteira</div>
+      <div class="grid-2">
+        <div class="panel">
+          <h3>Valor concedido por mês</h3>
+          <p class="sub">Passe o mouse sobre os pontos para ver o valor exato de cada competência.</p>
+          <div id="chart-carteira"></div>
+        </div>
+        <div class="panel">
+          <h3>Funil de aprovação</h3>
+          <p class="sub">Solicitado até desembolsado — mês corrente, regiões filtradas.</p>
+          <div id="chart-funil"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== Risco & Processos (Coordenação) ===== -->
+    <section class="view-panel" id="view-risco">
+      <div class="section-title">Indicadores de risco e operação</div>
+      <div class="kpi-grid" id="kpi-grid-risco"></div>
+
+      <div class="section-title">Risco</div>
+      <div class="grid-2">
+        <div class="panel">
+          <h3>Inadimplência 30d vs. taxa de aprovação</h3>
+          <div class="legend">
+            <span><span class="dot" style="background:#D65B5B"></span> Inadimplência 30d</span>
+            <span><span class="dot" style="background:#0B2540"></span> Taxa de aprovação</span>
+          </div>
+          <div id="chart-risco-aprovacao"></div>
+        </div>
+        <div class="panel">
+          <h3>Aging da carteira (faixas de risco)</h3>
+          <p class="sub">Valor em carteira por faixa de atraso, regiões filtradas.</p>
+          <div id="chart-risco"></div>
+        </div>
+      </div>
+
+      <div class="section-title">Operação — últimos 30 dias</div>
+      <div class="panel">
+        <h3>Produtividade por analista</h3>
+        <p class="sub">Base para identificar concentração de volume e gargalos de fila.</p>
+        <table class="data-table">
+          <thead><tr><th>Analista</th><th>Região</th><th>Operações analisadas</th><th>Tempo médio de resposta</th><th>Fila média pendente</th></tr></thead>
+          <tbody id="ops-tbody"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ===== Comercial & Regional (Gerência) ===== -->
+    <section class="view-panel" id="view-comercial">
+      <div class="section-title">Indicadores comerciais</div>
+      <div class="kpi-grid" id="kpi-grid-comercial"></div>
+
+      <div class="section-title">Distribuição da carteira ativa</div>
+      <div class="grid-3">
+        <div class="panel">
+          <h3>Por região</h3>
+          <div id="chart-regional"></div>
+        </div>
+        <div class="panel">
+          <h3>Por segmento</h3>
+          <div id="chart-segmento"></div>
+        </div>
+        <div class="panel">
+          <h3>Por setor</h3>
+          <div id="chart-setor"></div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="foot">
+    Case de portfólio construído a partir de uma vaga real de Business Analyst — dados 100% fictícios.
+    Feito por <strong>J. Gustavo Loureiro</strong> · <a href="https://github.com/jgustavoloureiro" target="_blank">github.com/jgustavoloureiro</a>
+  </footer>
+</div>
+
+<div class="assistant-panel" id="assistant-panel">
+  <div class="assistant-head">
+    <h4>Assistente do Painel</h4>
+    <div class="status"><span class="status-dot" id="status-dot"></span><span id="status-label">Motor de regras (offline)</span></div>
+    <button class="close-btn" id="assistant-close">✕</button>
+  </div>
+  <div class="progress-wrap" id="progress-wrap" style="display:none">
+    <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
+    <div class="progress-label" id="progress-label"></div>
+  </div>
+  <div class="assistant-body" id="assistant-body"></div>
+  <div class="assistant-suggestions">
+    <div class="suggestion">Resumo geral do mês</div>
+    <div class="suggestion">Como está a inadimplência?</div>
+    <div class="suggestion">Qual região tem mais carteira?</div>
+    <div class="suggestion">Como está o SLA de análise?</div>
+  </div>
+  <div class="assistant-foot">
+    <input type="text" id="assistant-input" placeholder="Pergunte sobre os dados do painel…">
+    <button id="assistant-send">Enviar</button>
+  </div>
+</div>
+
+<script type="application/json" id="ippiz-data"></script>
+<script src="charts.js"></script>
+<script src="ai-assistant.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

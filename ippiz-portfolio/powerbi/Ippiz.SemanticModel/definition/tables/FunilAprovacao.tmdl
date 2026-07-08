@@ -1,0 +1,30 @@
+table FunilAprovacao
+
+	column Etapa
+		dataType: string
+		summarizeBy: none
+		sourceColumn: etapa
+		sortByColumn: Ordem
+
+	column Ordem
+		dataType: int64
+		summarizeBy: none
+		sourceColumn: ordem
+		isHidden
+
+	column Qtd
+		dataType: int64
+		formatString: #,##0
+		summarizeBy: sum
+		sourceColumn: qtd
+
+	partition FunilAprovacao = m
+		mode: import
+		source =
+				let
+					Source = Json.Document(File.Contents("C:\CAMINHO\PARA\ippiz-portfolio\data\ippiz_data.json")),
+					dados = Source[funil_aprovacao],
+					Tabela = Table.FromRecords(dados),
+					Ordenado = Table.Sort(Tabela,{{"ordem", Order.Ascending}})
+				in
+					Ordenado
